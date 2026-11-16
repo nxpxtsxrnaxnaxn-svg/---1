@@ -1,0 +1,382 @@
+
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>โปรแกรมคำนวณรายได้สูงสุดจากพาราโบลา</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Tahoma, sans-serif;
+    background: linear-gradient(135deg, #e0f2fe, #fce7f3);
+    margin: 0;
+    padding: 25px;
+    color: #263247;
+}
+
+.container {
+    max-width: 850px;
+    margin: auto;
+    background: white;
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 5px 20px #00000015;
+}
+
+h1 {
+    text-align: center;
+    color: #2563eb;
+    font-size: 27px;
+}
+
+.subtitle {
+    text-align: center;
+    color: #64748b;
+    margin-bottom: 25px;
+}
+
+.formula {
+    background: #eff6ff;
+    padding: 15px;
+    text-align: center;
+    border-radius: 12px;
+    font-size: 22px;
+    font-weight: bold;
+    color: #1d4ed8;
+    margin-bottom: 20px;
+}
+
+.inputs {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+}
+
+label {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 8px;
+}
+
+input {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #cbd5e1;
+    border-radius: 10px;
+    font-size: 17px;
+}
+
+input:focus {
+    outline: none;
+    border-color: #3b82f6;
+}
+
+button {
+    width: 100%;
+    margin-top: 20px;
+    padding: 15px;
+    border: none;
+    border-radius: 12px;
+    background: #2563eb;
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #1d4ed8;
+}
+
+.result {
+    display: none;
+    margin-top: 25px;
+    background: #f0fdf4;
+    border: 2px solid #86efac;
+    border-radius: 15px;
+    padding: 20px;
+}
+
+.result h2 {
+    color: #15803d;
+    text-align: center;
+}
+
+.result p {
+    font-size: 17px;
+    line-height: 1.8;
+}
+
+.highlight {
+    font-size: 25px;
+    color: #15803d;
+    font-weight: bold;
+    text-align: center;
+}
+
+canvas {
+    width: 100%;
+    height: 350px;
+    margin-top: 20px;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    background: white;
+}
+
+.note {
+    margin-top: 20px;
+    padding: 15px;
+    background: #fff7ed;
+    border-radius: 10px;
+    line-height: 1.7;
+}
+
+@media(max-width: 600px) {
+    .inputs {
+        grid-template-columns: 1fr;
+    }
+
+    h1 {
+        font-size: 22px;
+    }
+
+    .container {
+        padding: 18px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>โปรแกรมคำนวณรายได้สูงสุด</h1>
+
+<p class="subtitle">
+การประยุกต์ใช้ฟังก์ชันกำลังสองเพื่อการวางแผนรายได้สูงสุด
+</p>
+
+<div class="formula">
+    y = ax? + bx + c
+</div>
+
+<h3>กรอกข้อมูลสมการพาราโบลา</h3>
+
+<div class="inputs">
+
+    <div>
+        <label>ค่า a</label>
+        <input type="number" id="a" value="-2" step="any">
+    </div>
+
+    <div>
+        <label>ค่า b</label>
+        <input type="number" id="b" value="40" step="any">
+    </div>
+
+    <div>
+        <label>ค่า c</label>
+        <input type="number" id="c" value="100" step="any">
+    </div>
+
+</div>
+
+<button onclick="calculate()">
+    คำนวณรายได้สูงสุด
+</button>
+
+<div class="result" id="result">
+
+    <h2>ผลการคำนวณ</h2>
+
+    <p id="equation"></p>
+    <p id="vertex"></p>
+    <p id="maximum"></p>
+    <p id="direction"></p>
+
+    <div class="highlight" id="answer"></div>
+
+    <h3>กราฟแสดงฟังก์ชันกำลังสอง</h3>
+
+    <canvas id="graph" width="800" height="400"></canvas>
+
+    <div class="note" id="summary"></div>
+
+</div>
+
+</div>
+
+<script>
+
+function calculate() {
+
+    let a = Number(document.getElementById("a").value);
+    let b = Number(document.getElementById("b").value);
+    let c = Number(document.getElementById("c").value);
+
+    if (
+        document.getElementById("a").value === "" ||
+        document.getElementById("b").value === "" ||
+        document.getElementById("c").value === ""
+    ) {
+        alert("กรุณากรอกข้อมูลให้ครบทุกช่อง");
+        return;
+    }
+
+    if (a === 0) {
+        alert("ค่า a ต้องไม่เท่ากับ 0 เพราะต้องเป็นฟังก์ชันกำลังสอง");
+        return;
+    }
+
+    if (a > 0) {
+        alert("พาราโบลานี้หงาย จึงมีค่าต่ำสุด ไม่ใช่ค่าสูงสุด");
+        return;
+    }
+
+    // คำนวณจุดยอดพาราโบลา
+
+    let x = -b / (2 * a);
+    let y = a * x * x + b * x + c;
+
+    let format = n => n.toLocaleString("th-TH", {
+        maximumFractionDigits: 2
+    });
+
+    document.getElementById("result").style.display = "block";
+
+    document.getElementById("equation").innerHTML =
+        "<b>สมการ:</b> y = " + a + "x? + " + b + "x + " + c;
+
+    document.getElementById("vertex").innerHTML =
+        "<b>จำนวนสินค้าที่เหมาะสม (x):</b> " + format(x);
+
+    document.getElementById("maximum").innerHTML =
+        "<b>พิกัดจุดยอดพาราโบลา:</b> (" +
+        format(x) + ", " + format(y) + ")";
+
+    document.getElementById("direction").innerHTML =
+        "<b>ลักษณะกราฟ:</b> พาราโบลาคว่ำ มีค่าสูงสุด";
+
+    document.getElementById("answer").innerHTML =
+        "รายได้สูงสุด = " + format(y) + " บาท";
+
+    document.getElementById("summary").innerHTML =
+        "<b>สรุปผล:</b> จากการคำนวณพบว่า เมื่อขายสินค้าในปริมาณ " +
+        format(x) + " หน่วย จะทำให้มีรายได้สูงสุดเท่ากับ " +
+        format(y) + " บาท ตามแบบจำลองทางคณิตศาสตร์";
+
+    drawGraph(a, b, c, x, y);
+
+}
+
+function drawGraph(a, b, c, vx, vy) {
+
+    const canvas = document.getElementById("graph");
+    const ctx = canvas.getContext("2d");
+
+    let w = canvas.width;
+    let h = canvas.height;
+
+    ctx.clearRect(0, 0, w, h);
+
+    // กำหนดขอบเขตกราฟ
+
+    let xMin = vx - Math.max(10, Math.abs(vx) * 0.7);
+    let xMax = vx + Math.max(10, Math.abs(vx) * 0.7);
+
+    let yMin = Math.min(0, vy * 0.85);
+    let yMax = vy * 1.2;
+
+    if (yMax <= yMin) {
+        yMax = yMin + 10;
+    }
+
+    let px = x => (x - xMin) / (xMax - xMin) * w;
+    let py = y => h - (y - yMin) / (yMax - yMin) * h;
+
+    // วาดเส้นตาราง
+
+    ctx.strokeStyle = "#e2e8f0";
+    ctx.lineWidth = 1;
+
+    for (let i = 0; i <= 10; i++) {
+        let gx = i * w / 10;
+        let gy = i * h / 10;
+
+        ctx.beginPath();
+        ctx.moveTo(gx, 0);
+        ctx.lineTo(gx, h);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(0, gy);
+        ctx.lineTo(w, gy);
+        ctx.stroke();
+    }
+
+    // วาดแกน x และ y
+
+    ctx.strokeStyle = "#475569";
+    ctx.lineWidth = 2;
+
+    if (yMin <= 0 && yMax >= 0) {
+        ctx.beginPath();
+        ctx.moveTo(0, py(0));
+        ctx.lineTo(w, py(0));
+        ctx.stroke();
+    }
+
+    if (xMin <= 0 && xMax >= 0) {
+        ctx.beginPath();
+        ctx.moveTo(px(0), 0);
+        ctx.lineTo(px(0), h);
+        ctx.stroke();
+    }
+
+    // วาดเส้นพาราโบลา
+
+    ctx.beginPath();
+    ctx.strokeStyle = "#2563eb";
+    ctx.lineWidth = 4;
+
+    for (let i = 0; i <= 500; i++) {
+
+        let x = xMin + (xMax - xMin) * i / 500;
+        let y = a*x*x + b*x + c;
+
+        if (i === 0) {
+            ctx.moveTo(px(x), py(y));
+        } else {
+            ctx.lineTo(px(x), py(y));
+        }
+    }
+
+    ctx.stroke();
+
+    // ทำเครื่องหมายจุดสูงสุด
+
+    ctx.beginPath();
+    ctx.arc(px(vx), py(vy), 8, 0, Math.PI * 2);
+    ctx.fillStyle = "#ef4444";
+    ctx.fill();
+
+    ctx.font = "bold 16px Tahoma";
+    ctx.fillStyle = "#dc2626";
+    ctx.fillText("จุดสูงสุด", px(vx) + 12, py(vy) - 12);
+
+    ctx.fillStyle = "#334155";
+    ctx.fillText("X", w - 20, py(0) - 10);
+    ctx.fillText("Y", px(0) + 10, 20);
+
+}
+
+</script>
+
+</body>
+</html>
